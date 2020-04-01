@@ -1,17 +1,24 @@
 window.Main = (function(utils, issues, comment) {
-  var term = new Terminal();
+  // 初始化 Terminal
+  const term = new Terminal();
   term.open(document.getElementById("terminal"));
 
-  var fitAddon = new FitAddon.FitAddon();
-  var webLinksAddon = new WebLinksAddon.WebLinksAddon();
+  // 初始化 Terminal 插件
+  const fitAddon = new FitAddon.FitAddon();
+  const webLinksAddon = new WebLinksAddon.WebLinksAddon();
   fitAddon.activate(term);
   webLinksAddon.activate(term);
 
+  // 自适应 Terminal
   fitAddon.fit();
-  var debounceFix = utils.debounce(fitAddon.fit.bind(fitAddon), 500);
+  const debounceFix = utils.debounce(fitAddon.fit.bind(fitAddon), 500);
   window.addEventListener("resize", debounceFix);
 
+  // 生成随机用户名或者读取登录用户名
   term.write("User $ ");
+
+  // 初始化文章
+  issues.byPage(1).then(console.log);
 
   term.onKey(function(data) {
     console.log(data);

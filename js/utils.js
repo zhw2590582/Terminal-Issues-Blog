@@ -10,6 +10,16 @@ window.Utils = (function() {
           fn.apply(context, args);
         }, delay);
       };
-    }
+    },
+    queryStringify: function(query) {
+      return Object.keys(query)
+        .map(key => `${key}=${encodeURIComponent(query[key] || "")}`)
+        .join("&");
+    },
+    truncateString: function(str, num) {
+      return str.length > num
+        ? `${str.slice(0, num > 3 ? num - 3 : num)}...`
+        : str;
+    },
   };
 })();
