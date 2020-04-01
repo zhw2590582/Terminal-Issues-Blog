@@ -1,8 +1,15 @@
-window.Main = (function(Utils, Issues, Comment) {
+window.Main = (function(utils, issues, comment) {
   var term = new Terminal();
-  term.loadAddon(new FitAddon.FitAddon());
-  term.loadAddon(new WebLinksAddon.WebLinksAddon());
   term.open(document.getElementById("terminal"));
+
+  var fitAddon = new FitAddon.FitAddon();
+  var webLinksAddon = new WebLinksAddon.WebLinksAddon();
+  fitAddon.activate(term);
+  webLinksAddon.activate(term);
+
+  fitAddon.fit();
+  var debounceFix = utils.debounce(fitAddon.fit.bind(fitAddon), 500);
+  window.addEventListener("resize", debounceFix);
 
   term.write("User $ ");
 
