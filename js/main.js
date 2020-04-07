@@ -1,28 +1,22 @@
-window.Main = (function(utils, issues, comment) {
-  // 初始化 Terminal
-  const term = new Terminal();
-  term.open(document.getElementById("terminal"));
-
-  // 初始化 Terminal 插件
-  const fitAddon = new FitAddon.FitAddon();
-  const webLinksAddon = new WebLinksAddon.WebLinksAddon();
-  fitAddon.activate(term);
-  webLinksAddon.activate(term);
-
-  // 自适应 Terminal
-  fitAddon.fit();
-  const debounceFix = utils.debounce(fitAddon.fit.bind(fitAddon), 500);
-  window.addEventListener("resize", debounceFix);
-
-  // 生成随机用户名或者读取登录用户名
-  term.write("User $ ");
+window.Main = (function (actions, utils, issues, comment) {
+  var term = new Term({
+    container: "#root",
+    width: 800,
+    height: 600,
+    pixelRatio: 2,
+    title: "老赵茶馆",
+    fontFamily: "monospace",
+    prefix: 'root@linux: ~ <d color="#00f501">$</d> ',
+    welcome: `
+Hi, 老赵其实不老, 也不喜欢喝茶, 是一枚前端攻城狮, 需联系请加QQ群: <i color="yellow">320881312</i>
+文章列表：<i color="yellow">post</i>, 页面列表：<i color="yellow">page</i>, 用户登录：<i color="yellow">login</i>, 发表评论：<i color="yellow">comment</i>, 清空日志：<i color="yellow">clear</i>
+<i color="#666">---------------------------------------------------------------------------</i>
+    `.trim(),
+    loading: () => '<d color="yellow">Please wait for a moment...</d>',
+    notFound: (val) => `🐶 : <d color='red'>${val}</d> : command not found`,
+    actions: actions,
+  });
 
   // 初始化文章
-  issues.byPage(1).then(console.log);
-
-  term.onKey(function(data) {
-    console.log(data);
-    term.write(data.key);
-    term.writeln("");
-  });
-})(window.Utils, window.Issues, window.Comment);
+  // issues.byPage(1).then(console.log);
+})(window.Actions, window.Utils, window.Issues, window.Comment);
