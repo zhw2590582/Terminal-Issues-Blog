@@ -1,14 +1,14 @@
-window.Issues = (function(utils, option) {
+window.Issues = (function(utils, github) {
   // 缓存所有请求结果
   const cache = new Map();
   return {
     // 基本url
     getUrl: function(opt) {
-      const api = `https://api.github.com/repos/${option.owner}/${option.repo}/issues`;
+      const api = `https://api.github.com/repos/${github.owner}/${github.repo}/issues`;
       const query = {
         t: Date.now(),
-        client_id: option.clientID,
-        client_secret: option.clientSecret,
+        client_id: github.clientID,
+        client_secret: github.clientSecret,
         ...opt
       };
       return `${api}?${utils.queryStringify(query)}`;
@@ -18,7 +18,7 @@ window.Issues = (function(utils, option) {
       return fetch(url, {
         headers: {
           "Content-Type": "application/json",
-          Accept: `application/vnd.github.v3.${option.requestType}+json`
+          Accept: `application/vnd.github.v3.${github.requestType}+json`
         }
       }).then(res => res.json());
     },
@@ -31,7 +31,7 @@ window.Issues = (function(utils, option) {
         updated_at: issue.updated_at,
         comments: issue.comments,
         tags: issue.labels
-          .filter(tag => !Object.values(option.labels).includes(tag.name))
+          .filter(tag => !Object.values(github.labels).includes(tag.name))
           .map(tag => tag.name),
         url: issue.url,
         id: issue.number,
@@ -43,7 +43,7 @@ window.Issues = (function(utils, option) {
       try {
         post.excerpt = truncateString(
           issue.body_text.replace(/[\r\n]/g, ""),
-          option.excerpt
+          github.excerpt
         );
       } catch (error) {
         post.excerpt = "";
@@ -60,32 +60,32 @@ window.Issues = (function(utils, option) {
       return post;
     },
     // 通过分页获取
-    byPage: function({ page = 1, labels = "", type = option.labels.post }) {
+    byPage: function({ page = 1, labels = "", type = github.labels.post }) {
       const key = `page=${page}&labels=${labels}&type=${type}`;
-      if (option.cache && cache.has(key)) {
+      if (github.cache && cache.has(key)) {
         return Promise.resolve(cache.get(key));
       }
 
-      const buildInLabels = Object.values(option.labels);
+      const buildInLabels = Object.values(github.labels);
       if (!buildInLabels.includes(type)) {
         throw new TypeError(`[type] only accept: ${buildInLabels.join("|")}.`);
       }
 
       const url = this.getUrl({
         page,
-        per_page: option.pageSize,
+        per_page: github.pageSize,
         labels: `${type},${labels}`
       });
 
       return this.getRequest(url).then(data => {
         const result = data.map(item => {
           const ItemResult = this.format(item);
-          if (option.cache) {
+          if (github.cache) {
             cache.set(`id=${item.number}`, ItemResult);
           }
           return ItemResult;
         });
-        if (option.cache) {
+        if (github.cache) {
           cache.set(key, result);
         }
         return result;
@@ -94,7 +94,7 @@ window.Issues = (function(utils, option) {
     // 通过id获取
     byId: function(id) {
       const key = `id=${id}`;
-      if (option.cache && cache.has(key)) {
+      if (github.cache && cache.has(key)) {
         return Promise.resolve(cache.get(key));
       }
 
@@ -102,11 +102,11 @@ window.Issues = (function(utils, option) {
 
       return this.getRequest(url).then(data => {
         const result = this.format(data);
-        if (option.cache) {
+        if (github.cache) {
           cache.set(key, result);
         }
         return result;
       });
     }
   };
-})(window.Utils, window.Option);
+})(window.Utils, window.Github);

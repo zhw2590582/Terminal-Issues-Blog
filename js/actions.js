@@ -1,67 +1,53 @@
-window.Actions = (function () {
+window.Actions = (function (issues, utils) {
+  const loading = '<d color="yellow">Please wait for a moment...</d>';
   return [
     {
-      // Exact match
-      input: "hi",
-      output: "😄 <d color='yellow'>hellow</d>",
-    },
-    {
-      // Regular match
-      input: /^bye/i,
-      output(input, args) {
-        return JSON.stringify({
-          input: `<d color='#00BCD4'>${input}</d>`,
-          args: args,
-        });
-      },
-    },
-    {
-      // Return a promise
-      input: /^test/i,
-      output(input) {
-        return new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(input.repeat(10));
-          }, 1000);
-        });
-      },
-    },
-    {
-      // Return a http request
-      input: /^http$/i,
-      output() {
-        return fetch("https://jsonplaceholder.typicode.com/todos/1")
-          .then((data) => data.json())
-          .then(JSON.stringify);
-      },
-    },
-    {
-      // Return your ip
-      input: /^ip$/i,
-      output() {
-        return fetch("https://ipinfo.io/json")
-          .then((data) => data.json())
-          .then(JSON.stringify);
-      },
-    },
-    {
-      // Return colorful text
-      input: /^color$/i,
-      output() {
-        const randomColor = () =>
-          `#${Math.floor(Math.random() * 16777215).toString(16)}`;
-        return fetch("https://data.iana.org/TLD/tlds-alpha-by-domain.txt")
-          .then((data) => data.text())
-          .then((text) => {
-            return text
-              .split(/\r?\n/)
-              .map((item) => `<d color="${randomColor()}">${item}</d>`)
-              .join(" ");
+      input: /^post(\s+\d+)?/i,
+      output(_, args) {
+        this.output(loading);
+        issues
+          .byPage({
+            page: args._[1] || 1,
+          })
+          .then((data) => {
+            const posts = data
+              .map(
+                (item) =>
+                  `[${utils.formatTime(item.created_at)}] - ${item.title}(${
+                    item.comments
+                  })
+`
+              )
+              .join("");
+            if (posts.length) {
+              this.output(posts, true).input("");
+            } else {
+              this.output("<d color='yellow'>No more posts.</d>", true).input(
+                ""
+              );
+            }
           });
       },
     },
     {
-      // Clear all log
+      input: /^page(\s+\d+)?/i,
+      output(text) {
+        return `<d color="#27C93F">${text}</d>`;
+      },
+    },
+    {
+      input: /^login$/i,
+      output(text) {
+        return `<d color="#27C93F">${text}</d>`;
+      },
+    },
+    {
+      input: /^comment$/i,
+      output(text) {
+        return `<d color="#27C93F">${text}</d>`;
+      },
+    },
+    {
       input: /^clear$/i,
       output() {
         this.clear();
@@ -69,4 +55,4 @@ window.Actions = (function () {
       },
     },
   ];
-})();
+})(window.Issues, window.Utils);

@@ -1,5 +1,5 @@
-window.Main = (function (actions, utils, issues, comment) {
-  var term = new Term({
+window.Main = (function (actions) {
+  new Term({
     container: "#root",
     width: 800,
     height: 600,
@@ -16,7 +16,4 @@ Hi, 老赵其实不老, 也不喜欢喝茶, 是一枚前端攻城狮, 需联系�
     notFound: (val) => `🐶 : <d color='red'>${val}</d> : command not found`,
     actions: actions,
   });
-
-  // 初始化文章
-  // issues.byPage(1).then(console.log);
-})(window.Actions, window.Utils, window.Issues, window.Comment);
+})(window.Actions);
