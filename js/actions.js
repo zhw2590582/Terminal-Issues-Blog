@@ -26,6 +26,10 @@ window.Actions = (function (issues, utils) {
                 ""
               );
             }
+          })
+          .catch((error) => {
+            const message = `<d color="red">${String(error)}</d>`;
+            this.output(message, true).input("");
           });
       },
     },
